@@ -1,40 +1,50 @@
-import streamlit as st
-import requests
+from flask import Flask, jsonify
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import hashlib
 
-# ✅ SHA-256 해시 함수
+app = Flask(__name__)
+
 def sha256_hash(password):
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
-# ✅ 자동 로그인 및 세션 쿠키 획득
-def get_session_cookie():
-    login_url = "https://www.orderqueen.kr/backoffice_admin/loginChk.itp"
-    
-    # 🔑 로그인 데이터
-    data = {
-        "userId": "yummar",
-        "encryptPw": sha256_hash("12345678")
-    }
+@app.route('/run-selenium', methods=['GET'])
+def run_selenium():
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-dev-shm-usage")
 
-    # 🟢 로그인 요청 및 세션 획득
-    with requests.Session() as session:
-        response = session.post(login_url, data=data)
-        
-        # 성공 시 세션 쿠키 반환
-        if response.status_code == 200 and "SESSION" in session.cookies:
-            return session.cookies.get("SESSION")
-        else:
-            return None
+    driver_path = "/usr/bin/chromedriver"
+    service = Service(driver_path)
+    driver = webdriver.Chrome(service=service, options=chrome_options)
 
-# 🔥 Streamlit 인터페이스
-st.title("OQ Auto Login")
+    try:
+        login_url = "https://www.orderqueen.kr/backoffice_admin/login.itp"
+        driver.get(login_url)
+        WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "userId")))
 
-if 'trigger' in st.query_params:
-    st.write("🔄 자동 로그인 진행 중...")
-    session_cookie = get_session_cookie()
-    if session_cookie:
-        st.success(f"✅ 로그인 성공! 세션 값: {session_cookie}")
-    else:
-        st.error("❌ 로그인 실패! 다시 시도하세요.")
-else:
-    st.markdown(f"[🚀 자동 로그인 실행](?trigger=true)")
+        driver.find_element(By.NAME, "userId").send_keys("yummar")
+        driver.find_element(By.NAME, "pw").send_keys("12345678")
+
+        hashed_pw = sha256_hash("12345678")
+        encrypt_input = driver.find_element(By.NAME, "encryptPw")
+        driver.execute_script("arguments[0].value = arguments[1];", encrypt_input, hashed_pw)
+
+        driver.find_element(By.ID, "btnLoginNew").click()
+        WebDriverWait(driver, 10).until(lambda d: d.current_url != login_url)
+
+        session_cookie = next(cookie['value'] for cookie in driver.get_cookies() if cookie['name'] == 'SESSION')
+        return jsonify({"session_cookie": session_cookie})
+
+    except Exception as e:
+        return jsonify({"error": str(e)})
+    finally:
+        driver.quit()
+
+if __name__ == '__main__':
+    app.run(host="0.0.0.0", port=8080)
