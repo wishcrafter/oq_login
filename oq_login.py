@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
@@ -9,17 +10,28 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import hashlib
 
+# ✅ Chrome 설치 설정 (Streamlit Cloud 전용)
+def install_chrome():
+    os.system("apt-get update")
+    os.system("apt-get install -y chromium-browser")
+    os.system("apt-get install -y chromium-chromedriver")
+    os.environ["PATH"] += ":/usr/lib/chromium-browser/"
+
+# ✅ SHA-256 해시 함수
 def sha256_hash(password):
     return hashlib.sha256(password.encode('utf-8')).hexdigest()
 
+# ✅ 자동 로그인 처리
 def get_session_cookie():
+    install_chrome()  # Chrome 설치 추가
+
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.binary_location = "/usr/bin/chromium-browser"
 
-    driver_path = "C:/path/to/chromedriver.exe"
-    service = Service(driver_path)
+    service = Service("/usr/bin/chromedriver")
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
@@ -50,10 +62,10 @@ def get_session_cookie():
     finally:
         driver.quit()
 
-# 자동화 트리거 URL
-st.title("오더퀸 자동화 시스템")
+# 🔥 Streamlit 인터페이스
+st.title("OQ Auto Login")
 
-if 'trigger' in st.experimental_get_query_params():
+if 'trigger' in st.query_params:
     st.write("🔄 자동 로그인 진행 중...")
     session_cookie = get_session_cookie()
     if session_cookie:
