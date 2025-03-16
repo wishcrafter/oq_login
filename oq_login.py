@@ -63,7 +63,7 @@ def get_session_cookie():
         driver.quit()
 
 # 🔥 Streamlit 인터페이스
-st.title("OQ Auto Login")
+st.title("오더퀸 자동화 시스템")
 
 if 'trigger' in st.query_params:
     st.write("🔄 자동 로그인 진행 중...")
