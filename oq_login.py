@@ -10,7 +10,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import hashlib
 
-# ✅ Chrome 설치 설정 (Streamlit Cloud 전용)
+# ✅ Chrome 및 ChromeDriver 설치
 def install_chrome():
     os.system("apt-get update")
     os.system("apt-get install -y chromium-browser")
@@ -29,9 +29,11 @@ def get_session_cookie():
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.binary_location = "/usr/bin/chromium-browser"
 
+    # ✅ Chrome 바이너리 및 드라이버 경로 설정
+    chrome_options.binary_location = "/usr/bin/chromium-browser"
     service = Service("/usr/bin/chromedriver")
+
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
@@ -63,7 +65,7 @@ def get_session_cookie():
         driver.quit()
 
 # 🔥 Streamlit 인터페이스
-st.title("OQ Auto Login")
+st.title("오더퀸 자동화 시스템")
 
 if 'trigger' in st.query_params:
     st.write("🔄 자동 로그인 진행 중...")
