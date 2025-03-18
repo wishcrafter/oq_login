@@ -6,6 +6,23 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+
+# Selenium Manager 자동 Chrome 설치
+driver = webdriver.Chrome(options=chrome_options)
+
+driver.get("https://www.orderqueen.kr/backoffice_admin/login.itp")
+print(driver.title)
+driver.quit()
+
+
 app = Flask(__name__)
 
 @app.route('/')
