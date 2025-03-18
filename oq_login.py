@@ -19,7 +19,7 @@ def login():
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
 
-    # ✅ ChromeDriver & Chromium 경로 설정
+    # ✅ ChromeDriver 및 Chromium 경로 지정
     chrome_options.binary_location = "/usr/bin/google-chrome"
     service = Service("/usr/bin/chromedriver")
     driver = webdriver.Chrome(service=service, options=chrome_options)
