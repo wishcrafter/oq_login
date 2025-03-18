@@ -29,7 +29,7 @@ app = Flask(__name__)
 def home():
     return "OQ Login Service is running!"
 
-@app.route('/login', methods=['GET'])
+@app.route('/login', methods=['POST'])
 def login():
     chrome_options = Options()
     chrome_options.add_argument("--headless")
