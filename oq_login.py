@@ -61,10 +61,10 @@ def login():
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)})
-
+        return jsonify({"error": str(e), "trace": traceback.format_exc()})
+        
     finally:
         driver.quit()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(debug=True, host='0.0.0.0', port=10000)
